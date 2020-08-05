@@ -1,0 +1,11 @@
+#!/bin/sh
+
+CMD="${@}"
+
+set -e
+
+if [ "${CMD%${CMD#test-smtp}}" = "test-smtp" ]; then
+    exec ${CMD}
+fi
+
+exec mailroom "${@}"
