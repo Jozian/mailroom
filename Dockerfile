@@ -18,4 +18,4 @@ COPY --from=builder /root/mailroom/test-smtp /usr/bin/
 COPY entrypoint /usr/bin/
 EXPOSE 8090
 USER mailroom
-ENTRYPOINT ["/usr/bin/entrypoint"]
+ENTRYPOINT ["entrypoint"]
