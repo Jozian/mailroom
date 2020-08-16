@@ -10,10 +10,10 @@ RUN apt-get -yq update \
                 grep
 RUN go build -ldflags "${COMPILE_FLAGS}" -o mailroom ./cmd/mailroom \
             && go build -ldflags "${COMPILE_FLAGS}" -o test-smtp ./cmd/test-smtp
-RUN export GOFLOW_VERSION=$(grep goflow go.mod | cut -d" " -f2) \
-            && curl https://codeload.github.com/nyaruka/goflow/tar.gz/${GOFLOW_VERSION} \
-                | tar --wildcards --strip=2 -zx "*/docs/en_US/*" \
-            && mv en_US docs
+RUN export GOFLOW_VERSION=$(grep goflow go.mod | cut -d" " -f2 | cut -c2-) \
+            && curl https://codeload.github.com/nyaruka/goflow/tar.gz/v${GOFLOW_VERSION} \
+                | tar --wildcards --strip=1 -zx "goflow-${GOFLOW_VERSION}/docs/*" \
+            && cp ./docs/en-us/*.* docs/
 
 FROM debian:buster AS mailroom
 RUN adduser --uid 1000 --disabled-password --gecos '' --home /srv/mailroom mailroom
