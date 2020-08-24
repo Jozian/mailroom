@@ -20,6 +20,8 @@ RUN adduser --uid 1000 --disabled-password --gecos '' --home /srv/mailroom mailr
 RUN apt-get -yq update \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y \
                 unattended-upgrades \
+                # ssl certs to external services
+                ca-certificates \
         && rm -rf /var/lib/apt/lists/* \
         && apt-get clean
 WORKDIR /srv/mailroom/mailroom
