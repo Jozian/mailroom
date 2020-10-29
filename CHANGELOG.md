@@ -1,3 +1,131 @@
+v5.7.40
+----------
+ * Update to goflow v0.105.5
+
+v5.7.39
+----------
+ * Fix input_labels_added event handling when session input ID isn't set
+
+v5.7.38
+----------
+ * Always request Mp3 files from Twilio IVR recordings
+
+v5.7.37
+----------
+ * Add support for outgoing mailgun ticket attachments
+
+v5.7.36
+----------
+ * Incoming attachments for mailgun ticketers
+
+v5.7.33
+----------
+ * Update to goflow v0.105.4
+ * Fix cloning of flows during simulation so that ignore keyword triggers is cloned too
+
+v5.7.32
+----------
+ * Update to goflow v0.105.3 to get support for arabic numerals in has_number tests
+
+v5.7.31
+----------
+ * Update to latest goflow to get for normalizing numbers from The Gambia
+ * Enable retrying on the elastic client
+
+v5.7.30
+----------
+ * Reorganization of core packages
+
+v5.7.29
+----------
+ * Fix race condition when bulk getting/creating contacts
+
+v5.7.28
+----------
+ * Add contact/resolve endpoint to assist with channel events still handled in RP
+
+v5.7.27
+----------
+ * If a flow start task creates new contacts, save those back to the start
+
+v5.7.26
+----------
+ * Add mockable DB to enable testing database errors
+ * CreateContact also should do lookup before trying to create new contact with URNs
+ * Imports 2.0
+
+v5.7.25
+----------
+ * Pass org from the base task to task structs to remove need for duplicating it in the task body
+
+v5.7.24
+----------
+ * Add SessionStatus to messages queued to courier
+
+v5.7.23
+----------
+ * Make defining new task types easier and drier
+ * Better locking when handling
+ * Fix and simplify creation of channel logs in IVR handlers
+
+v5.7.22
+----------
+ * Update to latest goflow v0.104.1
+
+v5.7.21
+----------
+ * Simplify test-smtp cmd using smtpx package
+ * Create new dbutil package with generic DB stuff
+ * Add task to calculate fires for new campaign event
+
+v5.7.20
+----------
+ * Fix incoming attachments from Zendesk
+
+v5.7.19
+----------
+ * Update to latest goflow
+ * Empty contact names and languages should be saved as NULL
+ * Delete no longer used utils/celery package
+
+v5.7.18
+----------
+ * Update to latest goflow
+ * Add support for incoming attachments on ticketing services
+
+v5.7.17
+----------
+ * Use status for elastic queries that need to filter out non-active contacts
+
+v5.7.16
+----------
+ * Add support for excluding contacts from searches by ids
+ * Rework utils/storage to be generic and moveable to gocommon
+
+v5.7.15
+----------
+ * Add create contact endpoint which uses modifiers to add fields and groups to contacts
+ * Rework contact creation functions to support creation with multiple URNs
+
+v5.7.14
+----------
+ * Stop writing is_blocked and is_stopped
+
+v5.7.13
+----------
+ * Read from contact.status intead of is_stopped/is_blocked
+ * Implement saving of zendesk ticket files as attachments
+ * Abstract S3 code so tests and dev envs can use file storage
+
+v5.7.12
+----------
+ * Fix inserting channel logs and add test
+
+v5.7.11
+----------
+ * Always write contact.status when writing is_blocked or is_stopped
+ * Convert IVR code to use goflow's httpx package
+
 v5.7.10
 ----------
  * Tweak goreleaser config to include subdirectories inside docs folder
