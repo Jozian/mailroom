@@ -1,4 +1,4 @@
-FROM golang:1.15-buster AS builder
+FROM golang:1.16-buster AS builder
 ENV CGO_ENABLED=0
 ARG COMPILE_FLAGS
 WORKDIR /root/mailroom
@@ -11,9 +11,8 @@ RUN apt-get -yq update \
 RUN go build -ldflags "${COMPILE_FLAGS}" -o mailroom ./cmd/mailroom \
             && go build -ldflags "${COMPILE_FLAGS}" -o test-smtp ./cmd/test-smtp
 RUN export GOFLOW_VERSION=$(grep goflow go.mod | cut -d" " -f2 | cut -c2-) \
-            && curl https://codeload.github.com/nyaruka/goflow/tar.gz/v${GOFLOW_VERSION} \
-                | tar --wildcards --strip=1 -zx "goflow-${GOFLOW_VERSION}/docs/*" \
-            && cp ./docs/en-us/*.* docs/
+        && curl -L https://github.com/nyaruka/goflow/releases/download/v${GOFLOW_VERSION}/docs.tar.gz | tar zxv \
+        && cp ./docs/en-us/*.* docs/
 
 FROM debian:buster AS mailroom
 RUN adduser --uid 1000 --disabled-password --gecos '' --home /srv/mailroom mailroom
