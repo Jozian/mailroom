@@ -1,14 +1,16 @@
-package courier
+package msgio
 
 import (
 	"encoding/json"
 	"strconv"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
 	"github.com/nyaruka/gocommon/urns"
 	"github.com/nyaruka/mailroom/core/models"
+
+	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -16,8 +18,8 @@ const (
 	defaultPriority = 0
 )
 
-// QueueMessages queues messages to courier, these should all be for the same contact
-func QueueMessages(rc redis.Conn, msgs []*models.Msg) error {
+// QueueCourierMessages queues messages for a single contact to Courier
+func QueueCourierMessages(rc redis.Conn, contactID models.ContactID, msgs []*models.Msg) error {
 	if len(msgs) == 0 {
 		return nil
 	}
@@ -43,15 +45,27 @@ func QueueMessages(rc redis.Conn, msgs []*models.Msg) error {
 			if err != nil {
 				return err
 			}
+			start := time.Now()
 			_, err = queueMsg.Do(rc, epochMS, "msgs", currentChannel.UUID(), currentChannel.TPS(), priority, batchJSON)
 			if err != nil {
 				return err
 			}
+			logrus.WithFields(logrus.Fields{
+				"msgs":         len(batch),
+				"contact_id":   contactID,
+				"channel_uuid": currentChannel.UUID(),
+				"elapsed":      time.Since(start),
+			}).Info("msgs queued to courier")
 		}
 		return nil
 	}
 
 	for _, msg := range msgs {
+		// android messages should never get in here
+		if msg.Channel() != nil && msg.Channel().Type() == models.ChannelTypeAndroid {
+			panic("trying to queue android messages to courier")
+		}
+
 		// ignore any message without a channel or already marked as failed (maybe org is suspended)
 		if msg.ChannelUUID() == "" || msg.Status() == models.MsgStatusFailed {
 			continue
@@ -65,11 +79,6 @@ func QueueMessages(rc redis.Conn, msgs []*models.Msg) error {
 		// no contact urn id or urn, also an error
 		if msg.URN() == urns.NilURN || msg.ContactURNID() == nil {
 			return errors.Errorf("msg passed with nil urn: %s", msg.URN())
-		}
-
-		// android channel? ignore
-		if msg.Channel().Type() == models.ChannelTypeAndroid {
-			continue
 		}
 
 		// same channel? add to batch

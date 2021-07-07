@@ -11,10 +11,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/nyaruka/gocommon/jsonx"
 	"github.com/nyaruka/mailroom/config"
 	"github.com/nyaruka/mailroom/core/models"
 	"github.com/nyaruka/mailroom/testsuite"
+	"github.com/nyaruka/mailroom/testsuite/testdata"
 	"github.com/nyaruka/mailroom/web"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -249,10 +252,8 @@ const (
 )
 
 func TestServer(t *testing.T) {
-	testsuite.Reset()
-	ctx := testsuite.CTX()
-	db := testsuite.DB()
-	rp := testsuite.RP()
+	ctx, _, db, rp := testsuite.Reset()
+
 	wg := &sync.WaitGroup{}
 
 	server := web.NewServer(ctx, config.Mailroom, db, rp, nil, nil, wg)
@@ -265,20 +266,10 @@ func TestServer(t *testing.T) {
 	session := ""
 
 	// add a trigger for our campaign flow with 'trigger'
-	db.MustExec(
-		`INSERT INTO triggers_trigger(is_active, created_on, modified_on, keyword, is_archived, 
-									  flow_id, trigger_type, match_type, created_by_id, modified_by_id, org_id)
-		VALUES(TRUE, now(), now(), 'trigger', false, $1, 'K', 'O', 1, 1, 1) RETURNING id`,
-		models.CampaignFlowID,
-	)
+	testdata.InsertKeywordTrigger(db, testdata.Org1, testdata.CampaignFlow, "trigger", models.MatchOnly, nil, nil)
 
 	// also add a catch all
-	db.MustExec(
-		`INSERT INTO triggers_trigger(is_active, created_on, modified_on, keyword, is_archived, 
-									  flow_id, trigger_type, match_type, created_by_id, modified_by_id, org_id)
-		VALUES(TRUE, now(), now(), NULL, false, $1, 'C', NULL, 1, 1, 1) RETURNING id`,
-		models.CampaignFlowID,
-	)
+	testdata.InsertCatchallTrigger(db, testdata.Org1, testdata.CampaignFlow, nil, nil)
 
 	tcs := []struct {
 		URL      string
@@ -301,9 +292,7 @@ func TestServer(t *testing.T) {
 		var body io.Reader
 
 		// in the case of a resume, we have to sub in our session body from our start
-		if strings.Contains(tc.Body, "$$SESSION$$") {
-			tc.Body = strings.Replace(tc.Body, "$$SESSION$$", session, -1)
-		}
+		tc.Body = strings.Replace(tc.Body, "$$SESSION$$", session, -1)
 
 		if tc.Body != "" {
 			body = bytes.NewReader([]byte(tc.Body))
@@ -325,7 +314,7 @@ func TestServer(t *testing.T) {
 			// save the session for use in a resume
 			parsed := make(map[string]interface{})
 			json.Unmarshal(content, &parsed)
-			sessionJSON, _ := json.Marshal(parsed["session"])
+			sessionJSON := jsonx.MustMarshal(parsed["session"])
 			session = string(sessionJSON)
 
 			context, hasContext := parsed["context"]

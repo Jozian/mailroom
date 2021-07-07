@@ -8,16 +8,15 @@ import (
 	"github.com/nyaruka/goflow/test"
 	"github.com/nyaruka/mailroom/core/models"
 	"github.com/nyaruka/mailroom/testsuite"
+	"github.com/nyaruka/mailroom/testsuite/testdata"
 
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestContactIDsForQueryPage(t *testing.T) {
-	testsuite.Reset()
-	ctx := testsuite.CTX()
-	db := testsuite.DB()
+	ctx, _, db, _ := testsuite.Reset()
 
 	es := testsuite.NewMockElasticServer()
 	defer es.Close()
@@ -44,7 +43,7 @@ func TestContactIDsForQueryPage(t *testing.T) {
 		ExpectedError     string
 	}{
 		{
-			Group: models.AllContactsGroupUUID,
+			Group: testdata.AllContactsGroup.UUID,
 			Query: "george",
 			ExpectedESRequest: `{
 				"_source": false,
@@ -84,7 +83,8 @@ func TestContactIDsForQueryPage(t *testing.T) {
 							"order": "desc"
 						}
 					}
-				]
+				],
+				"track_total_hits": true
 			}`,
 			MockedESResponse: fmt.Sprintf(`{
 				"_scroll_id": "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAbgc0WS1hqbHlfb01SM2lLTWJRMnVOSVZDdw==",
@@ -112,13 +112,13 @@ func TestContactIDsForQueryPage(t *testing.T) {
 					}
 				  ]
 				}
-			}`, models.GeorgeID),
-			ExpectedContacts: []models.ContactID{models.GeorgeID},
+			}`, testdata.George.ID),
+			ExpectedContacts: []models.ContactID{testdata.George.ID},
 			ExpectedTotal:    1,
 		},
 		{
-			Group:      models.BlockedContactsGroupUUID,
-			ExcludeIDs: []models.ContactID{models.BobID, models.CathyID},
+			Group:      testdata.BlockedContactsGroup.UUID,
+			ExcludeIDs: []models.ContactID{testdata.Bob.ID, testdata.Cathy.ID},
 			Query:      "age > 32",
 			Sort:       "-age",
 			ExpectedESRequest: `{
@@ -195,7 +195,8 @@ func TestContactIDsForQueryPage(t *testing.T) {
 							"order": "desc"
 						}
 					}
-				]
+				],
+				"track_total_hits": true
 			}`,
 			MockedESResponse: fmt.Sprintf(`{
 				"_scroll_id": "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAbgc0WS1hqbHlfb01SM2lLTWJRMnVOSVZDdw==",
@@ -223,8 +224,8 @@ func TestContactIDsForQueryPage(t *testing.T) {
 					}
 				  ]
 				}
-			}`, models.GeorgeID),
-			ExpectedContacts: []models.ContactID{models.GeorgeID},
+			}`, testdata.George.ID),
+			ExpectedContacts: []models.ContactID{testdata.George.ID},
 			ExpectedTotal:    1,
 		},
 		{
@@ -251,9 +252,7 @@ func TestContactIDsForQueryPage(t *testing.T) {
 }
 
 func TestContactIDsForQuery(t *testing.T) {
-	testsuite.Reset()
-	ctx := testsuite.CTX()
-	db := testsuite.DB()
+	ctx, _, db, _ := testsuite.Reset()
 
 	es := testsuite.NewMockElasticServer()
 	defer es.Close()
@@ -335,8 +334,8 @@ func TestContactIDsForQuery(t *testing.T) {
 					}
 				  ]
 				}
-			}`, models.GeorgeID),
-			ExpectedContacts: []models.ContactID{models.GeorgeID},
+			}`, testdata.George.ID),
+			ExpectedContacts: []models.ContactID{testdata.George.ID},
 		}, {
 			Query: "nobody",
 			ExpectedESRequest: `{
