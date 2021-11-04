@@ -24,7 +24,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/jozian/courier
+          images: ghcr.io/jozian/mailroom
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
