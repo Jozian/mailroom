@@ -24,6 +24,8 @@ RUN apt-get -yq update \
                 ca-certificates \
         && rm -rf /var/lib/apt/lists/* \
         && apt-get clean
+# Make directory so it has correct ownership
+RUN install -o mailroom -d /srv/mailroom/mailroom
 WORKDIR /srv/mailroom/mailroom
 COPY --from=builder /root/mailroom/mailroom /usr/bin/
 COPY --from=builder /root/mailroom/test-smtp /usr/bin/
