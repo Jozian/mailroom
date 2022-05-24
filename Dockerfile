@@ -1,7 +1,10 @@
-FROM golang:1.16-buster AS builder
+FROM golang:1.18-buster AS builder
 ENV CGO_ENABLED=0
 ARG COMPILE_FLAGS
 WORKDIR /root/mailroom
+COPY go.mod /root/mailroom/go.mod
+COPY go.sum /root/mailroom/go.sum
+RUN go mod download
 COPY . /root/mailroom
 RUN apt-get -yq update \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y \
